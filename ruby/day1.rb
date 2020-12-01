@@ -1,10 +1,15 @@
 numbers = DATA.each_line.map(&:to_i)
 
-a, b = numbers.combination(2).find{|combination| combination.sum == 2020}
-puts "--part1-- a:#{a}, b: #{b}, a*b: #{a * b}"
+part1 = numbers.combination(2)
+  .find{|combination| combination.sum == 2020}
+  .reduce(&:*)
+puts "PART1: #{part1}"
 
-a, b, c = numbers.combination(3).find{|combination| combination.sum == 2020}
-puts "--part1-- a,b,c:#{a}, #{b}, #{c} a*b*c: #{a * b * c}"
+part2 = numbers.combination(3)
+  .find{|combination| combination.sum == 2020}
+  .reduce(&:*)
+
+puts "PART2: #{part2}"
 
 
 __END__
