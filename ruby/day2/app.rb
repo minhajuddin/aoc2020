@@ -10,19 +10,17 @@ def parse(line)
   [min, max, char, password]
 end
 
-def valid_part2?(line)
-  pos1, pos2, char, password = parse(line)
+def valid_part2?(pos1, pos2, char, password)
   (password[pos1 - 1] == char) ^ (password[pos2 - 1] == char)
 end
 
-def valid_part1?(line)
-  min, max, char, password = parse(line)
+def valid_part1?(min, max, char, password)
   char_count = password.each_char.count {|x| x == char} 
   (min..max).include?(char_count)
 end
 
 def valid_password_count(lines, validator)
-  lines.find_all{|x| validator.call(x)}.count
+  lines.find_all {|line| validator.call(*parse(line)) }.count
 end
 
 lines = ARGF.each_line.to_a
