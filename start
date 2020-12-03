@@ -10,9 +10,14 @@ system("./download-todays-input.sh")
 day = "day#{Date.today.day}"
 
 folder = "./ruby/#{day}"
+script_path = "#{folder}/app.rb"
 
+# make the app.rb
 FileUtils.mkdir_p(folder)
-File.write(File.join("#{folder}/app.rb"), ERB.new(DATA.read).result(binding))
+File.write(script_path, ERB.new(DATA.read).result(binding))
+
+# open vim
+exec("vim -o #{script_path} ./inputs/#{day}")
 
 __END__
 #!/usr/bin/env ruby
