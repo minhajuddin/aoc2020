@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+require 'date'
+require 'erb'
+require 'fileutils'
+
+puts "> downloading today's input"
+system("./download-todays-input.sh")
+
+day = "day#{Date.today.day}"
+
+folder = "./ruby/#{day}"
+
+FileUtils.mkdir_p(folder)
+File.write(File.join("#{folder}/app.rb"), ERB.new(DATA.read).result(binding))
+
+__END__
+#!/usr/bin/env ruby
+
+# <%= day %> solution
+input_file_path = File.expand_path("../../../inputs/<%= day %>", __FILE__)
+lines = File.readlines(input_file_path).map(&:strip)
+
+# your solution
+
