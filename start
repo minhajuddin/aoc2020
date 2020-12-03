@@ -1,23 +1,36 @@
 #!/usr/bin/env ruby
 
+# put the session in bashrc `export AOC_SESSION="..."`
+# You can find this in your browser's cookies
+
 require 'date'
 require 'erb'
 require 'fileutils'
 
-puts "> downloading today's input"
-system("./download-todays-input.sh")
+day_i = Date.today.day
+day = "day#{day_i}"
 
-day = "day#{Date.today.day}"
+script_path = "./ruby/#{day}/app.rb"
+input_path = "./inputs/#{day}" 
 
-folder = "./ruby/#{day}"
-script_path = "#{folder}/app.rb"
+FileUtils.mkdir_p(File.dirname(input_path))
+FileUtils.mkdir_p(File.dirname(script_path))
 
 # make the app.rb
-FileUtils.mkdir_p(folder)
-File.write(script_path, ERB.new(DATA.read).result(binding))
+unless File.exists?(script_path)
+  puts "> render script"
+  File.write(script_path, ERB.new(DATA.read).result(binding))
+end
+
+unless File.exists?(input_path)
+  cmd = <<~CMD
+  curl --silent --show-error --cookie "session=$AOC_SESSION" --output "#{input_path}" "https://adventofcode.com/2020/day/#{day_i}/input"
+  CMD
+  system(cmd)
+end
 
 # open vim
-exec("vim -O #{script_path} ./inputs/#{day}")
+exec("vim -O #{script_path} #{input_path}")
 
 __END__
 #!/usr/bin/env ruby
