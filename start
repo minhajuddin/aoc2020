@@ -17,7 +17,7 @@ FileUtils.mkdir_p(folder)
 File.write(script_path, ERB.new(DATA.read).result(binding))
 
 # open vim
-exec("vim -o #{script_path} ./inputs/#{day}")
+exec("vim -O #{script_path} ./inputs/#{day}")
 
 __END__
 #!/usr/bin/env ruby
