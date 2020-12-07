@@ -61,7 +61,31 @@ rule = parse_line("faded blue bags contain no other bags.")
 raise "incorrect parser #{rule}" unless rule.bag == "faded blue"
 raise "incorrect parser #{rule}" unless rule.contents == []
 
+example =<<~EXAMPLE
+shiny gold bags contain 2 dark red bags.
+dark red bags contain 2 dark orange bags.
+dark orange bags contain 2 dark yellow bags.
+dark yellow bags contain 2 dark green bags.
+dark green bags contain 2 dark blue bags.
+dark blue bags contain 2 dark violet bags.
+dark violet bags contain no other bags.
+EXAMPLE
+
 rules = lines.map{|x| parse_line(x)}
 rules_h = rules.map{|x| [x.bag, x.contents.map(&:color)]}.to_h
 digest = digest_rules(rules_h) # => {"bright white" => ["dark orange", ...]}
-puts containers_for("shiny gold", digest)
+# puts containers_for("shiny gold", digest)
+
+## part 2
+
+def inner_bags(bag, rules_h)
+  return 0 if rules_h[bag] == []
+  inner = rules_h[bag].map{|x| x.count * inner_bags(x.color, rules_h)}.sum
+  return rules_h[bag].map(&:count).sum + inner
+end
+
+bag = "shiny gold"
+rules_h = rules.map{|x| [x.bag, x.contents]}.to_h
+
+puts "# part2"
+puts inner_bags(bag, rules_h).inspect
