@@ -2,7 +2,7 @@ defmodule Day8 do
   import Logger, only: [info: 1]
 
   defmodule State do
-    defstruct visited: MapSet.new(), ptr: 0, acc: 0, instrs: nil
+    defstruct visited: MapSet.new(), ptr: 0, acc: 0, instrs: nil, instr_count: nil
   end
 
   def solve(input_filepath) do
@@ -11,7 +11,36 @@ defmodule Day8 do
   end
 
   defp part2(input_filepath) do
+    input_filepath
+    |> parse
+    |> maybe_toggle_instr_and_exec(0)
   end
+
+  defp maybe_toggle_instr_and_exec(%State{} = state, line_number) do
+    # NOTE: we execute even when there is no change :(
+    state
+    |> toggle_instr(line_number)
+    |> exec
+    |> case do
+      {:end, state} ->
+        log(state, "ENDED_NORMALLY")
+
+      {:infinite_loop, _state} ->
+        log(state, "INF")
+        maybe_toggle_instr_and_exec(state, line_number + 1)
+    end
+  end
+
+  defp toggle_instr(state, line_number) do
+    new_instr = toggle(state.instrs[line_number])
+
+    instrs = Map.put(state.instrs, line_number, new_instr)
+    %{state | instrs: instrs}
+  end
+
+  defp toggle("acc" <> _ = instr), do: instr
+  defp toggle("jmp" <> rest), do: "nop" <> rest
+  defp toggle("nop" <> rest), do: "jmp" <> rest
 
   defp part1(input_filepath) do
     input_filepath
@@ -34,11 +63,11 @@ defmodule Day8 do
       |> Enum.with_index()
       |> Enum.into(%{}, fn {k, v} -> {v, k} end)
 
-    %State{instrs: instrs}
+    %State{instrs: instrs, instr_count: map_size(instrs)}
   end
 
   defp exec(%State{} = state) do
-    log(state, "EXECUTING")
+    # log(state, "EXECUTING")
 
     case {MapSet.member?(state.visited, state.ptr), state.instrs[state.ptr]} do
       {true, _} ->
