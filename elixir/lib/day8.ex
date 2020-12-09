@@ -7,9 +7,26 @@ defmodule Day8 do
 
   def solve(input_filepath) do
     part1(input_filepath)
+    part2(input_filepath)
+  end
+
+  defp part2(input_filepath) do
   end
 
   defp part1(input_filepath) do
+    input_filepath
+    |> parse
+    |> exec
+    |> case do
+      {:end, state} ->
+        log(state, "ENDED_NORMALLY")
+
+      {:infinite_loop, state} ->
+        log(state, "INFINITE_LOOP")
+    end
+  end
+
+  defp parse(input_filepath) do
     instrs =
       input_filepath
       |> File.read!()
@@ -17,7 +34,7 @@ defmodule Day8 do
       |> Enum.with_index()
       |> Enum.into(%{}, fn {k, v} -> {v, k} end)
 
-    exec(%State{instrs: instrs})
+    %State{instrs: instrs}
   end
 
   defp exec(%State{} = state) do
@@ -25,8 +42,8 @@ defmodule Day8 do
 
     case {MapSet.member?(state.visited, state.ptr), state.instrs[state.ptr]} do
       {true, _} ->
-        log(state, "INFINITE_LOOP")
         {:infinite_loop, state}
+
       {_, nil} ->
         {:end, state}
 
