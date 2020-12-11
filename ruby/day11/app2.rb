@@ -51,16 +51,12 @@ def compute_seat_state(grid, seat, row_i, col_i)
 
   #puts "#{seat}: #{row_i}x#{col_i} #{row_l}x#{col_l}"
 
-  adjacent_occupied_seats = [
-    n = seat_in_direction(grid, row_i, col_i, -1, 0, row_l, col_l),
-    s = seat_in_direction(grid, row_i, col_i, +1, 0, row_l, col_l),
-    e = seat_in_direction(grid, row_i, col_i, 0, +1, row_l, col_l),
-    e = seat_in_direction(grid, row_i, col_i, 0, -1, row_l, col_l),
-    nw = seat_in_direction(grid, row_i, col_i, -1, -1, row_l, col_l),
-    ne = seat_in_direction(grid, row_i, col_i, -1, +1, row_l, col_l),
-    sw = seat_in_direction(grid, row_i, col_i, +1, -1, row_l, col_l),
-    se = seat_in_direction(grid, row_i, col_i, +1, +1, row_l, col_l),
-  ].count{|x| x == '#'}
+  dx = dy = [-1, 0, +1]
+  directions = dx.product(dy) - [[0, 0]]
+
+  adjacent_occupied_seats =
+    directions
+    .count{|dx, dy| seat_in_direction(grid, row_i, col_i, dx, dy, row_l, col_l) == '#'}
 
   if adjacent_occupied_seats == 0
     '#'
