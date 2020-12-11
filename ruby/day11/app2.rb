@@ -23,13 +23,6 @@ def parse_grid(text)
   text.lines.map{|x| x.strip.chars}.reject{|x| x.empty?}
 end
 
-def occupied?(grid, row, col)
-  return '.' if row.nil? || col.nil?
-  return '.' if row < 0 || col < 0
-
-  grid.dig(row, col) || '.'
-end
-
 def seat_in_direction(grid, row_i, col_i, dy, dx, row_l, col_l)
 
   loop do
@@ -43,19 +36,17 @@ def seat_in_direction(grid, row_i, col_i, dy, dx, row_l, col_l)
   end
 end
 
+dx = dy = [-1, 0, +1]
+DIRECTIONS = dx.product(dy) - [[0, 0]]
+
 def compute_seat_state(grid, seat, row_i, col_i)
   return '.' if seat == '.'
 
   row_l = grid.length
   col_l = grid.first.length
 
-  #puts "#{seat}: #{row_i}x#{col_i} #{row_l}x#{col_l}"
-
-  dx = dy = [-1, 0, +1]
-  directions = dx.product(dy) - [[0, 0]]
-
   adjacent_occupied_seats =
-    directions
+    DIRECTIONS
     .count{|dx, dy| seat_in_direction(grid, row_i, col_i, dx, dy, row_l, col_l) == '#'}
 
   if adjacent_occupied_seats == 0
@@ -76,7 +67,6 @@ def recompute_grid(grid)
 end
 
 def print_grid(grid)
-  system("clear")
   puts '-' * grid.first.length
   puts grid.map{|r| r.join('')}.join("\n")
 end
