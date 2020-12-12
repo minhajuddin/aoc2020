@@ -2,6 +2,11 @@
 
 require 'ostruct'
 
+def turn(instr)
+end
+
+turn("R90")
+
 # day12 solution
 input_file_path = File.expand_path("../../../inputs/day12", __FILE__)
 instrs = File.readlines(input_file_path).map(&:strip)
@@ -34,31 +39,58 @@ class Direction
 
 end
 
-Ferry = Struct.new(:direction, :x, :y)
+Waypoint = Struct.new(:x_units, :y_units)
+class Waypoint
+  def flip_direction(direction)
+    (["L", "R"] - [direction]).first
+  end
+
+  def turn(direction, x, y)
+    case direction
+    when "R90"
+      [y, -1 * x]
+    when "L90"
+      [-1 * y, x]
+    when /.180/
+      [-1 * x, -1 * y]
+    when /.270/
+      turn("#{flip_direction(direction[0])}90", x, y)
+    end
+  end
+
+  def update(instr)
+    case instr
+    when /N|S|E|W/
+      direction = Direction.for(instr[0])
+      self.x_units += direction.x_mult * instr[1..-1].to_i
+      self.y_units += direction.y_mult * instr[1..-1].to_i
+    when /L|R/
+      self.x_units, self.y_units = turn(instr, self.x_units, self.y_units)
+    end
+  end
+end
+
+Ferry = Struct.new(:waypoint, :x, :y)
 class Ferry
 
-  def move(direction, distance)
+  def move(times)
     # curr = "(#{self.x},#{self.y})"
-    direction = direction || self.direction
-    self.x += distance * direction.x_mult
-    self.y += distance * direction.y_mult
+    self.x += times * waypoint.x_units
+    self.y += times * waypoint.y_units
 
     # puts "#{curr} => (#{self.x},#{self.y})"
-    self
   end
 
   def navigate(instrs)
     instrs.reduce(self) do |ferry, instr|
       case instr
-      when /N|S|W|E/
-        direction = Direction.for(instr[0])
-        ferry.move(direction, instr[1..-1].to_i)
-      when /L|R/
-        ferry.direction = ferry.direction.turn(instr[0], instr[1..-1].to_i)
-        ferry
       when /F/
-        ferry.move(nil, instr[1..-1].to_i)
+        ferry.move(instr[1..-1].to_i)
+      else
+        ferry.waypoint.update(instr)
       end
+
+      ferry
     end
   end
 
@@ -67,7 +99,7 @@ class Ferry
   end
 end
 
-ferry = Ferry.new(Direction.for("E"), 0, 0).navigate(instrs)
+ferry = Ferry.new(Waypoint.new(10, 1), 0, 0).navigate(instrs)
 puts ferry.manhattan_dist
 
 exit
