@@ -1,11 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'ostruct'
-
-def turn(instr)
-end
-
-turn("R90")
 
 # day12 solution
 input_file_path = File.expand_path("../../../inputs/day12", __FILE__)
