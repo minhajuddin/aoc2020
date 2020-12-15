@@ -7,13 +7,18 @@ lines = File.readlines(input_file_path).map(&:strip)
 Occ = Struct.new(:number, :count, :positions)
 
 class Occ
+  def self.update(occ, num, pos)
+      occ ||= Occ.new(num, 0, [])
+      occ.count += 1
+      occ.positions.unshift(pos)
+      occ
+  end
 end
 
 # your solution
 def next_num(series, n)
   series = series.split(",").map{|x| x.strip.to_i}
 
-  ans = nil
   mem = {}
   prev = nil
   (1..n).each do |i|
@@ -30,19 +35,13 @@ def next_num(series, n)
 
     ## first time seeing the prev number
     if prev.count == 1
-      mem[0] = mem[0] || Occ.new(0, 0, [])
-      mem[0].count += 1
-      mem[0].positions.unshift(i)
-      prev = mem[0]
+      prev = mem[0] = Occ.update(mem[0], 0, i)
       next
     end
 
     ## we've seen the prev number before
     num = prev.positions[0] - prev.positions[1]
-    mem[num] = mem[num] || Occ.new(num, 0, [])
-    mem[num].count += 1
-    mem[num].positions.unshift(i)
-    prev = mem[num]
+    prev = mem[num] = Occ.update(mem[num], num, i)
     next
 
 
@@ -55,5 +54,5 @@ def next_num(series, n)
 end
 
 #puts next_num("0,3,6", 10)
-#puts next_num(lines.first, 2020)
+puts next_num(lines.first, 2020)
 puts next_num(lines.first, 30000000)
