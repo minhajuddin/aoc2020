@@ -1,11 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'ostruct'
-
-def turn(instr)
-end
-
-turn("R90")
 
 # day12 solution
 input_file_path = File.expand_path("../../../inputs/day12", __FILE__)
@@ -39,25 +33,32 @@ class Direction
 
 end
 
-Waypoint = Struct.new(:x_units, :y_units)
-class Waypoint
-  def flip_direction(direction)
-    (["L", "R"] - [direction]).first
+module Turner
+  module_function
+
+  def parse(direction)
+    m = (/^(?<direction>L|R)(?<degrees>\d+)$/).match(direction)
+    [m['direction'], m['degrees'].to_i]
   end
 
   def turn(direction, x, y)
-    case direction
-    when "R90"
-      [y, -1 * x]
-    when "L90"
-      [-1 * y, x]
-    when /.180/
-      [-1 * x, -1 * y]
-    when /.270/
-      turn("#{flip_direction(direction[0])}90", x, y)
+    direction, degrees = parse(direction)
+
+    if direction == "L"
+      degrees = 360 - degrees
     end
+    turn_right(degrees, x, y)
   end
 
+  def turn_right(degrees, x, y)
+    return [x, y] if degrees == 0
+
+    turn_right(degrees - 90, y, -1 * x)
+  end
+end
+
+Waypoint = Struct.new(:x_units, :y_units)
+class Waypoint
   def update(instr)
     case instr
     when /N|S|E|W/
@@ -65,7 +66,7 @@ class Waypoint
       self.x_units += direction.x_mult * instr[1..-1].to_i
       self.y_units += direction.y_mult * instr[1..-1].to_i
     when /L|R/
-      self.x_units, self.y_units = turn(instr, self.x_units, self.y_units)
+      self.x_units, self.y_units = Turner.turn(instr, self.x_units, self.y_units)
     end
   end
 end
