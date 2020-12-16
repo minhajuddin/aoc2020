@@ -37,28 +37,13 @@ def invalid_ticket_nums(validations_block, nearby_tickets_block)
 end
 
 def resolve(mappings)
-  #puts ">------------"
-  #puts mappings.inspect
-  #puts "<------------"
-
-  return mappings if mappings.all?{|_, v| v.is_a?(String)}
-
-  resolved = mappings.find_all{|k, v| v.length == 1}.map{|k, _| k}
-  resolved.each do |r|
-    field = mappings[r].first
-    mappings[r] = field
-  end
-
-  resolved_fields = mappings.map{|k, v| v}.find_all{|x| x.is_a?(String)}
-  mappings = mappings.map do |k, v|
-    if v.is_a?(String)
-      [k , v]
-    else
-      [k , v - resolved_fields]
-    end
-  end.to_h
-
-  resolve(mappings)
+  mappings
+    .sort_by{|k, v| v.length}
+    .reduce([{}, []]) do |(memo, resolved_cols), (idx, cols)|
+      col = (cols - resolved_cols).first
+      memo[col] = idx
+      [memo, resolved_cols + [col]]
+    end.first
 end
 
 def part2(validations_block, your_ticket_block, nearby_tickets_block)
@@ -99,13 +84,13 @@ def part2(validations_block, your_ticket_block, nearby_tickets_block)
   end.to_h
 
 
-  field_mappings = resolve(potential_mappings).map{|k, v| [v, k]}.to_h
+  field_mappings = resolve(potential_mappings)
   your_ticket_fields = your_ticket_block.split("\n").find{|x| x.include?(",")}.split(",").map{|x| x.strip.to_i}
 
   field_mappings.find_all{|m, _| m.start_with?("departure")}.map {|_, i| your_ticket_fields[i]}.reduce(&:*)
 end
 
-part2(validations_block, your_ticket_block, nearby_tickets_block)
+puts part2(validations_block, your_ticket_block, nearby_tickets_block)
 exit
 puts part2(*<<~EX.split("\n\n"))
 class: 0-1 or 4-19
